@@ -1,0 +1,66 @@
+---
+- name: Ensure running OS in rhel7
+  assert:
+    fail_msg: Selected server is not a RedHat 7 system. Please choose a RedHat 7 system to proceed
+    that:
+      - ansible_facts.distribution == "RedHat"
+      - ansible_facts.distribution_major_version= "7"
+
+- name: Ensuring the latest version of subscription-manager
+  ansible.builtin.yum:
+    name: subscription-manager
+    state: latest
+
+#need to check rhsm availability in Barclays systems
+- name: Ensure the repositories are enabled
+  rhsm_repositories:
+    name: "{{ item }}"
+    stats: enabled
+  loop: "{{ rhel7_repositories }}"
+
+#needs to be changed as per Barclays standards
+- name: Unsetting subscription-manager release
+  rhsm_release:
+    release: null
+
+- name: yum version lock remove
+  yum_versionlock:
+    state: absent
+    name: '*'
+
+- name: Update the system using yum
+  ansible.builtin.yum:
+    name: '*'
+    state: latest
+  register: patch_status
+  changed_when: 'patch_status is succeeded'
+  notify: 
+    - reboot system
+
+- name: installing leapp utility
+  ansible.builtin.yum:
+    name: leapp-upgrade
+    state: latest
+
+- name: Disabling chef-client in the system
+  ansible.builtin.service:
+    name: chef-client
+    state: stopped
+    enabled: false
+
+#enabling rhel8 repositories
+- name: Enabling rhel8 repositories for leapp assessment
+  rhsm_repositories:
+    name: "{{ item }}"
+    stats: enabled
+  loop: "{{ rhel8_repositories }}"
+
+- name: Running the upgrade assessment
+  ansible.builtin.command: leapp upgrade
+  changed_when:
+
+
+  
+  
+
+

@@ -1,0 +1,8 @@
+---
+rhel7_repositories:
+  - rhel-7-server-rpms
+  - rhel-7-server-extras-rpms
+
+rhel8_repositories:
+  - rhel-8-for-x86_64-appstream-rpms
+  - rhel-8-for-x86_64-baseos-rpms

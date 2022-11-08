@@ -1,0 +1,7 @@
+---
+- name: rhel7 to rhel8 pre-upgrade preparation and tasks
+  hosts: all
+  become: true
+  gather_facts: true
+  roles:
+    - preupgrade
