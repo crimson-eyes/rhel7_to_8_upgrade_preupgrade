@@ -1,0 +1,22 @@
+---
+- name: Blacklisting floppy in modprobe
+  ansible.builtin.command: echo "blacklist floppy" | sudo tee /etc/modprobe.d/blacklist-floppy.conf
+  register: floppy_blacklist_status
+  changed_when: floppy_blacklist_status.rc == 0
+
+- name: Removing floppy driver
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - floppy
+    - pata_acpi
+
+- name: Blacklisting pata_acpi in modprobe
+  ansible.builtin.command: echo "blacklist pata_acpi" | sudo tee /etc/modprobe.d/blacklist-pata_acpi.conf
+  register: pata_acpi_blacklist_status
+  changed_when: pata_acpi_blacklist_status.rc == 0
+
+- name: dracut
+  ansible.builtin.command: dracut -f -v
+  ignore_errors: true

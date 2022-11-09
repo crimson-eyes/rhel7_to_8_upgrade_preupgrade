@@ -1,6 +1,6 @@
 ---
-- name: Ensure running OS in rhel7
-  assert:
+- name: Only continue if the system is rhel7
+  ansible.builtin.assert:
     fail_msg: Selected server is not a RedHat 7 system. Please choose a RedHat 7 system to proceed
     that:
       - ansible_facts.distribution == "RedHat"
@@ -23,30 +23,67 @@
   rhsm_release:
     release: null
 
-- name: yum version lock remove
+- name: Yum version lock remove
   yum_versionlock:
     state: absent
     name: '*'
+  ignore_errors: true
 
 - name: Update the system using yum
   ansible.builtin.yum:
     name: '*'
     state: latest
-  register: patch_status
-  changed_when: 'patch_status is succeeded'
-  notify: 
+  async: 2000
+  poll: 0
+  register: patch_result
+
+- name: Check patch result
+  async_status:
+    jid: "{{ patch_result['ansible_job_id'] }}"
+  register: async_poll_results
+  until: async_poll_results['finished']
+  retries: 10
+  delay: 60
+
+- name: Show results
+  debug:
+    var: async_poll_results
+
+- name: Ensure the result is successfull
+  ansible.builtin.assert:
+    that:
+      - async_poll_results['rc'] == 0
+
+- name: Nothing to patch
+  ansible.builtin.assert:
+    msg: "No patch available"
+    that:
+      - async_poll_results['rc'] == 0
+      - not async_poll_results['changed']
+
+- name: Applied patches
+  ansible.builtin.assert:
+    msg: async_poll_results['results']
+    that:
+      - async_poll_results['rc'] == 0
+      - async_poll_results['changed']
+  
+- name: Check if the system needs a reboot
+  ansible.builtin.assert:
+    fail_msg: Server has failed pathcing doesn't need a reboot.
+    that: async_poll_results['rc'] == 0
+  notify:
     - reboot system
 
-- name: installing leapp utility
+- name: Installing leapp utility
   ansible.builtin.yum:
     name: leapp-upgrade
     state: latest
 
-- name: Disabling chef-client in the system
-  ansible.builtin.service:
-    name: chef-client
-    state: stopped
-    enabled: false
+- name: Copy CHEF_RUNS_DISABLED using file lookup plugin to pause all Chef actions on the host
+  ansible.builtin.copy:
+    content: "{{ lookup('file', 'files/CHEF_RUNS_DISABLED') }}"
+    dest: /etc/chef/CHEF_RUNS_DISABLED
 
 #enabling rhel8 repositories
 - name: Enabling rhel8 repositories for leapp assessment
@@ -55,9 +92,18 @@
     stats: enabled
   loop: "{{ rhel8_repositories }}"
 
+#Run upgrade in the lab to check the condition of success
 - name: Running the upgrade assessment
-  ansible.builtin.command: leapp upgrade
+  ansible.builtin.command: leapp preupgrade
+  register: leapp_report_status
   changed_when:
+    - '"Answer file has been generated at /var/log/leapp/answerfile" in leapp_report_status.stdout'
+    - leapp_report_status == 0
+  
+- name: Deplaying the output of preupgrade asessment running
+  ansible.builtin.debug:
+    var: leapp_report_status
+    verbosity: 2
 
 
   
