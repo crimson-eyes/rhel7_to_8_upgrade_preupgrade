@@ -1,7 +1,7 @@
 ---
 - name: Only continue if the system is rhel7
   ansible.builtin.assert:
-    fail_msg: Selected server is not a RedHat 7 system. Please choose a RedHat 7 system to proceed
+    fail_msg: "Selected server is not a RedHat 7 system. Please choose a RedHat 7 system to proceed"
     that:
       - ansible_facts['distribution'] == "RedHat"
       - ansible_facts['distribution_major_version']= "7"
