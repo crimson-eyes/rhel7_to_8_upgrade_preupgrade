@@ -1,7 +1,5 @@
 ---
 - name: Rename network interfaces
-  hosts: all
-  become: true
   vars:
     src_prefix: "eth"
     dst_prefix: "em"
