@@ -1,8 +1,8 @@
 ---
 - name: rhel7 to rhel8 pre-upgrade preparation and tasks
-  hosts: all
+  hosts: test_servers
   become: true
   gather_facts: true
   roles:
-    - preupgrade_remediation
+#    - preupgrade_remediation
     - preupgrade
