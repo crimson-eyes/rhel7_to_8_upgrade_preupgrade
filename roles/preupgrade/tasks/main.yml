@@ -9,7 +9,7 @@
     fail_msg: "Selected server is not a RedHat 7 system. Please choose a RedHat 7 system to proceed"
     that:
       - ansible_facts['distribution'] == "RedHat"
-      - ansible_facts['distribution_major_version']= "7"
+      - ansible_facts['distribution_major_version'] == "7"
 #use ansible_distribution
 
 - name: Ensure subscription-manager is latest
@@ -17,11 +17,31 @@
     name: subscription-manager
     state: latest
 
+- name: Checking system registration
+  ansible.builtin.command: subscription-manager identity
+  register: registration_status
+  ignore_errors: true
+
+- name: showing registration status
+  debug:
+    var: registration_status.stderr_lines
+
+- name: Registering and subscribing system to RHN
+  redhat_subscription:
+    state: present
+    username: rh-ee-deray
+    password: J289scarface@p2345
+    auto_attach: true
+  when: registration_status.rc == 1
+#  register: subscription_status
+#  changed_when:
+#    - subscription_status.rc == 0
+
 #need to check rhsm availability in Barclays systems
 - name: Ensure the repositories are enabled
-  rhsm_repositories:
+  community.general.rhsm_repository:
     name: "{{ item }}"
-    stats: enabled
+    state: enabled
   loop: "{{ rhel7_repositories }}"
 
 #needs to be changed as per Barclays standards
@@ -30,7 +50,7 @@
     release: null
 
 - name: Yum version lock remove
-  yum_versionlock:
+  community.general.yum_versionlock:
     state: absent
     name: '*'
   ignore_errors: true
@@ -61,25 +81,30 @@
       - async_poll_results['rc'] == 0
 
 - name: Nothing to patch
-  ansible.builtin.assert:
+  ansible.builtin.debug:
     msg: "No patch available"
-    that:
-      - async_poll_results['rc'] == 0
-      - not async_poll_results['changed']
+  when:
+    - async_poll_results['rc'] == 0
+    - not async_poll_results['changed']
 
 - name: Applied patches
-  ansible.builtin.assert:
+  ansible.builtin.debug:
     msg: async_poll_results['results']
-    that:
-      - async_poll_results['rc'] == 0
-      - async_poll_results['changed']
+  when:
+    - async_poll_results['rc'] == 0
+    - async_poll_results['changed']
   
 - name: Check if the system needs a reboot
   ansible.builtin.assert:
     fail_msg: Server has failed pathcing doesn't need a reboot.
     that: async_poll_results['rc'] == 0
-  notify:
-    - reboot system
+#  notify:
+#    - reboot system
+
+- name: reboot system
+  ansible.builtin.reboot:
+    reboot_timeout: 3600
+  when: async_poll_results['rc'] == 0
 
 - name: Installing leapp utility
   ansible.builtin.yum:
@@ -90,22 +115,23 @@
   ansible.builtin.copy:
     content: "{{ lookup('file', 'files/CHEF_RUNS_DISABLED') }}"
     dest: /etc/chef/CHEF_RUNS_DISABLED
+  ignore_errors: true
 
 #enabling rhel8 repositories
-- name: Enabling rhel8 repositories for leapp assessment
-  rhsm_repositories:
-    name: "{{ item }}"
-    stats: enabled
-  loop: "{{ rhel8_repositories }}"
+#- name: Enabling rhel8 repositories for leapp assessment
+#  community.general.rhsm_repository:
+#    name: "{{ item }}"
+#    stats: enabled
+#  loop: "{{ rhel8_repositories }}"
 
 #Run upgrade in the lab to check the condition of success
 - name: Running the upgrade assessment
   ansible.builtin.command: leapp preupgrade
   register: leapp_report_status
-  changed_when:
-    - '"Answer file has been generated at /var/log/leapp/answerfile" in leapp_report_status.stdout'
-    - leapp_report_status == 0
-  
+  failed_when:
+    - '"Answerfile has been generated at /var/log/leapp/answerfile" not in leapp_report_status.stdout'
+    - '"Answerfile has been generated at /var/log/leapp/answerfile" not in leapp_report_status.stderr'
+
 - name: Deplaying the output of preupgrade asessment running
   ansible.builtin.debug:
     var: leapp_report_status

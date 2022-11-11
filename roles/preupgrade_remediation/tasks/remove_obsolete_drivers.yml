@@ -8,9 +8,7 @@
   community.general.modprobe:
     name: "{{ item }}"
     state: absent
-  loop:
-    - floppy
-    - pata_acpi
+  loop: "{{ obsolete_kernel_drivers }}"
 
 - name: Blacklisting pata_acpi in modprobe
   ansible.builtin.command: echo "blacklist pata_acpi" | sudo tee /etc/modprobe.d/blacklist-pata_acpi.conf

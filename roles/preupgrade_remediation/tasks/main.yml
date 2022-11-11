@@ -1,8 +1,9 @@
 ---
 - name: Changing the interface names from eth by importing tasks and variables
-  ansible.builtin.import_tasks: files/interface_rename.yml
+  ansible.builtin.import_tasks: interface_rename.yml
+
 
 - name: Remove obsolete kernel drivers importing tasks and variables
-  ansible.builtin.import_tasks: files/remove_obsolete_driver.yml
+  ansible.builtin.import_tasks: remove_obsolete_driver.yml
   
 
