@@ -4,5 +4,6 @@
   become: true
   gather_facts: true
   roles:
-#    - preupgrade_remediation
+  #  - preupgrade_remediation
     - preupgrade
+

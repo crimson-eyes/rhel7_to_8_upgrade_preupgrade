@@ -49,11 +49,17 @@
   rhsm_release:
     release: null
 
+- name: Checking yum versionlock package availability
+  ansible.builtin.yum:
+    list: yum-plugin-versionlock
+  register: package_result
+  ignore_errors: true
+
 - name: Yum version lock remove
   community.general.yum_versionlock:
     state: absent
     name: '*'
-  ignore_errors: true
+  when: package_result['results'][0]['yumstate'] == "installed"
 
 - name: Update the system using yum
   ansible.builtin.yum:
@@ -132,7 +138,6 @@
     - '"Answerfile has been generated at /var/log/leapp/answerfile" not in leapp_report_status.stdout'
     - '"Answerfile has been generated at /var/log/leapp/answerfile" not in leapp_report_status.stderr'
 
-- name: Deplaying the output of preupgrade asessment running
+- name: Displaying the output of preupgrade asessment running
   ansible.builtin.debug:
-    var: leapp_report_status
-    verbosity: 2
+    var: leapp_report_status.stdout_lines
