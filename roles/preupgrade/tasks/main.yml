@@ -112,6 +112,11 @@
     reboot_timeout: 3600
   when: async_poll_results['rc'] == 0
 
+- name: Installing cockpit-leapp
+  ansible.builtin.yum:
+    name: cockpit-leapp
+    state: present
+
 - name: Installing leapp utility
   ansible.builtin.yum:
     name: leapp-upgrade

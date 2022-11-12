@@ -4,6 +4,7 @@
 
 
 - name: Remove obsolete kernel drivers importing tasks and variables
-  ansible.builtin.import_tasks: remove_obsolete_driver.yml
+  ansible.builtin.import_tasks: remove_obsolete_drivers.yml
+
   
 
