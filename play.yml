@@ -3,6 +3,8 @@
   hosts: test_servers
   become: true
   gather_facts: true
+  vars_files:
+    - rh_reg.yml
   roles:
     - preupgrade_remediation
     - preupgrade

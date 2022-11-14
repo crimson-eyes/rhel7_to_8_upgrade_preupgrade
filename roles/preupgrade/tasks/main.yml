@@ -29,8 +29,8 @@
 - name: Registering and subscribing system to RHN
   redhat_subscription:
     state: present
-    username: rh-ee-deray
-    password: J289scarface@p2345
+    username: "{{ rh_ac_name }}"
+    password: "{{ rh_ac_passwd }}"
     auto_attach: true
   when: registration_status.rc == 1
 #  register: subscription_status
@@ -95,7 +95,7 @@
 
 - name: Applied patches
   ansible.builtin.debug:
-    msg: async_poll_results['results']
+    msg: "Patches applied" 
   when:
     - async_poll_results['rc'] == 0
     - async_poll_results['changed']
@@ -116,6 +116,8 @@
   ansible.builtin.yum:
     name: cockpit-leapp
     state: present
+  notify:
+    - Enable and starting cockpit
 
 - name: Installing leapp utility
   ansible.builtin.yum:

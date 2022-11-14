@@ -1,0 +1,6 @@
+---
+- name: Permitting root account login making changes in ssh configuration file
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    line: PermitRootLogin yes
+    backup: true

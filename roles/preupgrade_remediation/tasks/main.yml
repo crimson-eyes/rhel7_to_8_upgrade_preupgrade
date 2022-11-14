@@ -7,4 +7,7 @@
   ansible.builtin.import_tasks: remove_obsolete_drivers.yml
 
   
-
+- name: Permitting root login in rhel8 for upgrade
+  ansible.builtin.import_tasks: root_login_fix.yml
+#  notify:
+#    - restart sshd

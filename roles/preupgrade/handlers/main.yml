@@ -2,3 +2,10 @@
 - name: reboot system
   ansible.builtin.reboot:
     reboot_timeout: 3600
+
+---
+- name: Enable and starting cockpit
+  ansible.builtin.service:
+    name: cockpit.socket
+    state: started
+    enabled: true
