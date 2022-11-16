@@ -9,12 +9,17 @@
   register: pata_acpi_blacklist_status
   changed_when: pata_acpi_blacklist_status.rc == 0
 
-- name: Removing floppy driver
+#- name: Removing floppy driver
+#  ansible.builtin.shell: rmmod floppy
+  
+#- name: Removing pata_acpi
+#  ansible.builtin.shell: rmmod pata_acpi
+
+- name: Removing obsolete kernel drivers
   community.general.modprobe:
     name: "{{ item }}"
     state: absent
   loop: "{{ obsolete_kernel_drivers }}"
 
-- name: dracut
-  ansible.builtin.command: dracut -f -v
-  ignore_errors: true
+- name: Running dracut
+  ansible.builtin.raw: dracut -f -v

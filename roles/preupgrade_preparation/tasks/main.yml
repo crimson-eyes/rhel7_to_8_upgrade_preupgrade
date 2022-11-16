@@ -145,6 +145,3 @@
     - '"Answerfile has been generated at /var/log/leapp/answerfile" not in leapp_report_status.stdout'
     - '"Answerfile has been generated at /var/log/leapp/answerfile" not in leapp_report_status.stderr'
 
-- name: Displaying the output of preupgrade asessment running
-  ansible.builtin.debug:
-    var: leapp_report_status.stdout_lines
