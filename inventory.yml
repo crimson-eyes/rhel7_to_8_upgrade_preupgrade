@@ -1,8 +1,8 @@
 test_servers:
   hosts:
     test1:
-      ansible_host: 18.159.61.115
+      ansible_host: 
     test2:
-      ansible_host: 18.193.116.219
+      ansible_host: 
     test3:
-      ansible_host: 52.58.113.78
+      ansible_host: 

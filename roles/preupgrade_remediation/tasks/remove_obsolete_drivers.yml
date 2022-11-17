@@ -22,4 +22,4 @@
   loop: "{{ obsolete_kernel_drivers }}"
 
 - name: Running dracut
-  ansible.builtin.raw: dracut -f -v
+  ansible.builtin.shell: dracut -f -v
