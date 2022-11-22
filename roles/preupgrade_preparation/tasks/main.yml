@@ -37,12 +37,22 @@
 #  changed_when:
 #    - subscription_status.rc == 0
 
+- name: Removing other repositories
+  ansible.builtin.command: mv /etc/yum.repos.d/* /tmp
+
+- name: Cleaning yum metadata
+  ansible.builtin.command: yum clean all
+  args:
+    warn: false
+
 #need to check rhsm availability in Barclays systems
 - name: Ensure the repositories are enabled
   community.general.rhsm_repository:
     name: "{{ item }}"
     state: enabled
   loop: "{{ rhel7_repositories }}"
+
+#- name: Yum repolist
 
 #needs to be changed as per Barclays standards
 - name: Unsetting subscription-manager release

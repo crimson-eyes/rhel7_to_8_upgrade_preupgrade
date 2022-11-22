@@ -1,19 +1,35 @@
 ---
-- name: Blacklisting floppy in modprobe
-  ansible.builtin.shell: echo "blacklist floppy" | sudo tee /etc/modprobe.d/blacklist-floppy.conf
-  register: floppy_blacklist_status
-  changed_when: floppy_blacklist_status.rc == 0
+- name: Creating blacklisting floppy and pata_acpi in modprobe directory
+  ansible.builtin.file:
+    path: /etc/modprobe.d/"{{ item }}"
+    state: touch
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - "{{ blacklist_files }}"
 
-- name: Blacklisting pata_acpi in modprobe
-  ansible.builtin.shell: echo "blacklist pata_acpi" | sudo tee /etc/modprobe.d/blacklist-pata_acpi.conf
-  register: pata_acpi_blacklist_status
-  changed_when: pata_acpi_blacklist_status.rc == 0
+- name: Blacklisting pata_acpi in modprobe file
+  ansible.builtin.lineinfile:
+    path: /etc/modprobe.d/blacklist-pata_acpi.conf
+    line:  blacklist pata_acpi
 
-#- name: Removing floppy driver
-#  ansible.builtin.shell: rmmod floppy
-  
-#- name: Removing pata_acpi
-#  ansible.builtin.shell: rmmod pata_acpi
+- name: Blacklisting floppy in modprobe file
+  ansible.builtin.lineinfile:
+    path: /etc/modprobe.d/blacklist-floppy.conf
+    line:  blacklist floppy
+
+#- name: Blacklisting floppy in modprobe file
+#  ansible.builtin.shell: echo "blacklist floppy" | sudo tee /etc/modprobe.d/blacklist-floppy.conf
+#  register: floppy_blacklist_status
+#  changed_when: floppy_blacklist_status.rc == 0
+
+#- name: Blacklisting pata_acpi in modprobe
+#  ansible.builtin.shell: echo "blacklist pata_acpi" | sudo tee /etc/modprobe.d/blacklist-pata_acpi.conf
+#  register: pata_acpi_blacklist_status
+#  changed_when: pata_acpi_blacklist_status.rc == 0
+
+#command or file module couldn't create the files inside the modeprobe. Hence using shell
 
 - name: Removing obsolete kernel drivers
   community.general.modprobe:
@@ -23,3 +39,4 @@
 
 - name: Running dracut
   ansible.builtin.shell: dracut -f -v
+#dracut was failing with command module, so switched to shell.

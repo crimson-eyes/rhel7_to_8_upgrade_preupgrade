@@ -6,6 +6,11 @@ osnet_conf: "/etc/os-net-config/config.json"
 src_interfaces: "{{ ansible_interfaces | select('match', src_prefix ~ '.*') | sort | list }}"
 undercloud_conf: "~/undercloud.conf"
 
+#Blacklist files in modprobe directory
+blacklist_files:
+  - blacklist-floppy.conf
+  - blacklist-pata_acpi.conf
+
 #Variables for remove_obsolete_driver task
 obsolete_kernel_drivers:
   - floppy
