@@ -26,19 +26,25 @@
   debug:
     var: registration_status.stderr_lines
 
+- name: Checking consumed subscriptions
+  ansible.builtin.command: subscription-manager list --consumed
+  register: consumed_subscriptions
+
+- name: Displaying the consumed subscription-manager
+  debug:
+    var: consumed_subscriptions
+
 - name: Registering and subscribing system to RHN
   redhat_subscription:
     state: present
     username: "{{ rh_ac_name }}"
     password: "{{ rh_ac_passwd }}"
+    force: true
     auto_attach: true
   when: registration_status.rc == 1
 #  register: subscription_status
 #  changed_when:
 #    - subscription_status.rc == 0
-
-- name: Removing other repositories
-  ansible.builtin.command: mv /etc/yum.repos.d/* /tmp
 
 - name: Cleaning yum metadata
   ansible.builtin.command: yum clean all
@@ -52,7 +58,6 @@
     state: enabled
   loop: "{{ rhel7_repositories }}"
 
-#- name: Yum repolist
 
 #needs to be changed as per Barclays standards
 - name: Unsetting subscription-manager release
