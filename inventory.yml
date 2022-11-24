@@ -9,4 +9,4 @@ test_servers:
     test4:
       ansible_host: 
     test5:
-      ansible_host: 
+      ansible_host:

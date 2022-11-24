@@ -46,6 +46,11 @@
 #  changed_when:
 #    - subscription_status.rc == 0
 
+- name: Disabling all repositories
+  ansible.builtin.yum_repository:
+    name: '*'
+    state: absent
+
 - name: Cleaning yum metadata
   ansible.builtin.command: yum clean all
   args:

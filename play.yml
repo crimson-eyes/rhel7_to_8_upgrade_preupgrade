@@ -6,7 +6,7 @@
   vars_files:
     - rh_reg.yml
   roles:
-  #  - preupgrade_preparation
+    - preupgrade_preparation
     - preupgrade_remediation
     - preupgrade_run
 
