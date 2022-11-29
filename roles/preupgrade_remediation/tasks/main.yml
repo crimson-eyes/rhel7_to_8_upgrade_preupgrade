@@ -1,17 +1,15 @@
 ---
 - name: Changing the interface names from eth by importing tasks and variables
   ansible.builtin.import_tasks: interface_rename.yml
-  notify:
-    - reboot system
+  register: interface_status
+
+- name: Permitting root login in rhel8 for upgrade
+  ansible.builtin.import_tasks: root_login_fix.yml
+
 
 - name: Remove obsolete kernel drivers importing tasks and variables
   ansible.builtin.import_tasks: remove_obsolete_drivers.yml
 
-  
-- name: Permitting root login in rhel8 for upgrade
-  ansible.builtin.import_tasks: root_login_fix.yml
-  notify:
-    - restart sshd
 
 - name: Removing old leapp report and answer file
   ansible.builtin.file:

@@ -6,7 +6,3 @@ test_servers:
       ansible_host: 
     test3:
       ansible_host: 
-    test4:
-      ansible_host: 
-    test5:
-      ansible_host:

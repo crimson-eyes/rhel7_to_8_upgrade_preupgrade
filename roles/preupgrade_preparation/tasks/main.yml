@@ -39,12 +39,13 @@
     state: present
     username: "{{ rh_ac_name }}"
     password: "{{ rh_ac_passwd }}"
-    force: true
-    auto_attach: true
+    force_register: true
+#    auto_attach: true
   when: registration_status.rc == 1
 #  register: subscription_status
 #  changed_when:
 #    - subscription_status.rc == 0
+# auto attach is disabled as SCA is enabled in the account
 
 - name: Disabling all repositories
   ansible.builtin.yum_repository:

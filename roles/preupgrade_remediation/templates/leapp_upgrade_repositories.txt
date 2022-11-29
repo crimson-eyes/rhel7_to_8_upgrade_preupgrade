@@ -1,0 +1,3 @@
+[repository_id]
+name=repository_name
+baseurl=repository_url

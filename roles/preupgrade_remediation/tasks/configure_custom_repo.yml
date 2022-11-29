@@ -1,0 +1,4 @@
+- name: Copying the repo files in leapp custom repo directory
+  ansible.builtin.template:
+    src: leapp_upgrade_repositories.txt
+    dest: /etc/leapp/files/leapp_upgrade_repositories.repo
