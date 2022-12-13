@@ -4,5 +4,3 @@
     path: /etc/ssh/sshd_config
     line: PermitRootLogin yes
     backup: true
-  notify:
-    - restart sshd

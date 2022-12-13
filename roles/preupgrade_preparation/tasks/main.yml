@@ -158,7 +158,7 @@
 #    stats: enabled
 #  loop: "{{ rhel8_repositories }}"
 
-#Run upgrade in the lab to check the condition of success
+#Run upgrade in the lab to check the condition of success#
 - name: Running the upgrade assessment
   ansible.builtin.command: leapp preupgrade
   register: leapp_report_status
@@ -166,3 +166,35 @@
     - '"Answerfile has been generated at /var/log/leapp/answerfile" not in leapp_report_status.stdout'
     - '"Answerfile has been generated at /var/log/leapp/answerfile" not in leapp_report_status.stderr'
 
+#Running remediation after the first preupgrade assessment run#
+
+- name: Changing the interface names from eth by importing tasks and variables
+  ansible.builtin.import_tasks: interface_rename.yml
+  register: interface_status
+
+- name: Permitting root login in rhel8 for upgrade
+  ansible.builtin.import_tasks: root_login_fix.yml
+
+- name: Rebooting the system
+  ansible.builtin.reboot:
+    reboot_timeout: 3600
+
+- name: Remove obsolete kernel drivers importing tasks and variables
+  ansible.builtin.import_tasks: remove_obsolete_drivers.yml
+
+#Running the final time preupgrade assement after remediation of inhibitors#
+- name: Provide confirmation in answer file
+  ansible.builtin.lineinfile:
+    path: /var/log/leapp/answerfile
+    line: confirm = True
+
+- name: Running the upgrade assessment
+  ansible.builtin.command: leapp preupgrade
+  register: leapp_report_status
+  failed_when:
+    - '"Answerfile has been generated at /var/log/leapp/answerfile" not in leapp_report_status.stdout'
+    - '"Answerfile has been generated at /var/log/leapp/answerfile" not in leapp_report_status.stderr'
+
+- name: Displaying the output of preupgrade asessment running
+  ansible.builtin.debug:
+    var: leapp_report_status
