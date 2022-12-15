@@ -1,0 +1,9 @@
+- name: Copying the repo file for - rhel-7-server repository
+  ansible.builtin.copy:
+    src: files/rhel-7-server-rpms
+    dest: /etc/yum.repos.d/rhel-7-server-rpms.repo
+
+- name: Copying the repo file for - rhel-7-server-extras repository
+  ansible.builtin.copy:
+    src: files/rhel-7-server-extras.repo
+    dest: /etc/yum.repos.d/rhel-7-server-extras.repo

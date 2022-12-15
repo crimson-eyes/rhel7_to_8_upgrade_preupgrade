@@ -64,6 +64,9 @@
     state: enabled
   loop: "{{ rhel7_repositories }}"
 
+- name: Copy repository files to server importing tasks and variables
+  ansible.builtin.import_tasks: repo_file_place.yml
+
 
 #needs to be changed as per Barclays standards
 - name: Unsetting subscription-manager release
